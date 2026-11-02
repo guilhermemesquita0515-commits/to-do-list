@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
   font-family: 'Arial', sans-serif;
+  outline: 0;
 }
 
 :root {
-  --background: #eaf5ff;
+  --base: #d3e0eb;
+  --card: #d3e8ff;
+  --backgroud: #f1f8ff;
+  --texto-primo: #273444;
+  --texto-segundo: #64748B;
+  --destaque: #3877bb;
+  --hover: #1b78db;
+  --borda: #adc7e3;
 }
