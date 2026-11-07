@@ -36,13 +36,16 @@ export default function App() {
   const dataCompleta = data.toLocaleDateString('pt-BR')
 
   const addTask = useCallback((e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  e.preventDefault()
 
-    if (!content.trim()) {
-      toast.error('Digite uma descrição para a tarefa!')
-      return
-    }
+  if (!content.trim()) {
+    toast.error('Digite uma descrição para a tarefa!')
+    return
+  }
 
+  if (edit.enabled) {
+    saveTask()
+  } else {
     const novaTarefa: TaskProps = {
       id: crypto.randomUUID(),
       content: content.trim(),
@@ -52,14 +55,16 @@ export default function App() {
 
     setTask((tarefas) => [...tarefas, novaTarefa])
 
-    setContent('')
-    setLevel('1')
-
-    inputRef.current?.focus()
-
     toast.success('Tarefa adicionada!')
+  }
 
-  }, [content, level, dataCompleta])
+  setContent('')
+  setLevel('1')
+  setEdit({ enabled: false, tarefa: '' })
+
+  inputRef.current?.focus()
+
+}, [content, level, dataCompleta, edit])
 
   const nTasks = useMemo(() => {
     return task.length
@@ -69,9 +74,40 @@ export default function App() {
     setTask((tarefas) =>
       tarefas.filter((tarefa) => tarefa.id !== id)
     )
-    
+
     toast.success('Tarefa excluída!')
   }
+
+  function modificar(tarefa: TaskProps) {
+
+    setContent(tarefa.content)
+    setLevel(String(tarefa.level))
+
+    setEdit({
+      enabled: true,
+      tarefa: tarefa.id
+    })
+
+    inputRef.current?.focus()
+
+    toast.info('Editando tarefa.')
+  }
+
+  function saveTask() {
+  setTask((tarefas) =>
+    tarefas.map((tarefa) =>
+      tarefa.id === edit.tarefa
+        ? {
+            ...tarefa,
+            content: content.trim(),
+            level: Number(level)
+          }
+        : tarefa
+    )
+  )
+
+  toast.success('Tarefa atualizada!')
+}
 
   return (
     <div className="bg-(--base) w-full h-screen flex flex-col items-center justify-center">
@@ -122,7 +158,7 @@ export default function App() {
             <div className="flex flex-col mb-2">
 
               <h2 className="text-2xl font-bold text-(--destaque)">
-                Nova tarefa
+                {edit.enabled ? 'Editar tarefa' : 'Nova tarefa'}
               </h2>
 
             </div>
@@ -175,9 +211,23 @@ export default function App() {
               type="submit"
               className="w-full bg-(--destaque) text-white font-semibold rounded-md py-3 mt-2 transition-all hover:bg-(--hover) active:scale-[0.98] cursor-pointer"
             >
-              Adicionar tarefa
+              {edit.enabled ? 'Alterar tarefa' : 'Adicionar tarefa'}
             </button>
 
+            {edit.enabled && (
+              <button
+                type='button'
+                onClick={ () => {
+                  setEdit({ enabled: false, tarefa: '' })
+                  setContent('')
+                  setLevel('1')
+                  inputRef.current?.focus()
+                }}
+                className="text-sm text-(--texto-segundo) cursor-pointer hover:text-(--destaque) transition-colors"
+              >
+                Cancelar Alteração
+              </button>
+            )}
           </form>
 
         </section>
@@ -239,6 +289,7 @@ export default function App() {
 
                   <button
                     type="button"
+                    onClick={() => modificar(tarefa)}
                     className="text-(--destaque) font-semibold text-sm cursor-pointer"
                   >
                     Editar
