@@ -9,7 +9,6 @@ import {
 
 import { Toaster, toast } from 'sonner'
 
-// Estrutura de uma tarefa
 interface TaskProps {
   id: string
   content: string
@@ -23,6 +22,10 @@ export default function App() {
   const [content, setContent] = useState('')
   const [level, setLevel] = useState('1')
   const [task, setTask] = useState<TaskProps[]>([])
+  const [edit, setEdit] = useState({
+    enabled: false,
+    tarefa: ''
+  })
 
   const data = new Date()
 
@@ -32,7 +35,6 @@ export default function App() {
 
   const dataCompleta = data.toLocaleDateString('pt-BR')
 
-  // Adicionar tarefa
   const addTask = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
@@ -56,11 +58,20 @@ export default function App() {
     inputRef.current?.focus()
 
     toast.success('Tarefa adicionada!')
+
   }, [content, level, dataCompleta])
 
-  const nTask = useMemo(() => {
+  const nTasks = useMemo(() => {
     return task.length
   }, [task])
+
+  function deleteTask(id: string){
+    setTask((tarefas) =>
+      tarefas.filter((tarefa) => tarefa.id !== id)
+    )
+    
+    toast.success('Tarefa excluída!')
+  }
 
   return (
     <div className="bg-(--base) w-full h-screen flex flex-col items-center justify-center">
@@ -92,7 +103,7 @@ export default function App() {
           </h2>
 
           <span className='text-(--destaque) font-semibold text-xl mr-4'>
-            {nTask} tarefas
+            {nTasks} tarefas
           </span>
 
         </div>
@@ -113,10 +124,6 @@ export default function App() {
               <h2 className="text-2xl font-bold text-(--destaque)">
                 Nova tarefa
               </h2>
-
-              <p className="text-sm text-(--texto-segundo)">
-                Adicione uma tarefa à sua lista.
-              </p>
 
             </div>
 
@@ -172,6 +179,86 @@ export default function App() {
             </button>
 
           </form>
+
+        </section>
+
+        <section className="flex-1 min-w-0 pl-3 flex flex-col gap-3 overflow-y-auto">
+
+          <div className="flex items-center justify-between">
+
+            <h2 className="text-2xl font-bold text-(--destaque)">
+              Minhas tarefas
+            </h2>
+
+          </div>
+
+
+          {task.length === 0 ? (
+
+            <div className="flex flex-col items-center justify-center flex-1 text-center gap-2">
+
+              <span className="text-(--texto-primo) font-semibold">
+                Nenhuma tarefa por aqui.
+              </span>
+
+            </div>
+
+          ) : (
+
+            task.map((tarefa) => (
+
+              <div
+                key={tarefa.id}
+                className="flex items-center justify-between gap-3 bg-(--card) rounded-sm p-3"
+              >
+
+                <div className="flex flex-col gap-1 min-w-0">
+
+                  <span className="font-semibold text-(--texto-primo)">
+                    {tarefa.content}
+                  </span>
+
+                  <span className="text-xs text-(--texto-segundo)">
+                    {tarefa.date}
+                  </span>
+
+                  <div className="text-xs font-semibold text-(--destaque)">
+                    Prioridade: {
+                      tarefa.level === 1
+                        ? <span className="text-xs font-semibold text-(--destaque)">Baixo</span>
+                        : tarefa.level === 2
+                          ? <span className="text-xs font-semibold text-amber-400">Medio</span>
+                          : <span className="text-xs font-semibold text-red-700">Alto</span>
+                    }
+                  </div>
+
+                </div>
+
+
+                <div className="flex items-center gap-2 shrink-0">
+
+                  <button
+                    type="button"
+                    className="text-(--destaque) font-semibold text-sm cursor-pointer"
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {deleteTask(tarefa.id)}}
+                    className="text-red-700 font-semibold text-sm cursor-pointer"
+                  >
+                    Excluir
+                  </button>
+
+                </div>
+
+              </div>
+
+            ))
+
+          )}
 
         </section>
 
