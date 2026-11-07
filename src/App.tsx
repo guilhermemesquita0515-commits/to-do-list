@@ -4,6 +4,7 @@ import {
   useRef,
   useCallback,
   useMemo,
+  useEffect,
   type FormEvent
 } from 'react'
 
@@ -22,10 +23,28 @@ export default function App() {
   const [content, setContent] = useState('')
   const [level, setLevel] = useState('1')
   const [task, setTask] = useState<TaskProps[]>([])
+  const [carregado, setCarregado] = useState(false)
   const [edit, setEdit] = useState({
     enabled: false,
     tarefa: ''
   })
+
+  useEffect( () => {
+
+    const tarefaSalva = localStorage.getItem('@tarefas')
+
+    if(tarefaSalva){
+      setTask(JSON.parse(tarefaSalva));
+    }
+
+    setCarregado(true)
+  },[])
+
+  useEffect(() => {
+    if (carregado) {
+      localStorage.setItem('@tarefas', JSON.stringify(task))
+    }
+  }, [task, carregado]) 
 
   const data = new Date()
 
